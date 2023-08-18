@@ -23,7 +23,22 @@ package me.fallenbreath.fastipping;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+//#if FORGE
+//$$ @net.minecraftforge.fml.common.Mod("fastipping")
+//#endif
 public class FastIpPingMod
+		//#if FABRIC
+		implements net.fabricmc.api.ModInitializer
+		//#endif
 {
 	public static final Logger LOGGER = LogManager.getLogger();
+
+	//#if FABRIC
+	@Override public void onInitialize()
+	//#elseif FORGE
+	//$$ public FastIpPingMod()
+	//#endif
+	{
+		LOGGER.info("ping fast!");
+	}
 }

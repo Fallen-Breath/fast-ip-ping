@@ -17,6 +17,9 @@
 
   "environment": "client",
   "entrypoints": {
+    "main": [
+      "me.fallenbreath.fastipping.FastIpPingMod"
+    ]
   },
   "mixins": [
     "fastipping.mixins.json"

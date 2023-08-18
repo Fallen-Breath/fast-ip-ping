@@ -3,6 +3,8 @@
 [![License](https://img.shields.io/github/license/Fallen-Breath/fast-ip-ping.svg)](http://www.gnu.org/licenses/lgpl-3.0.html)
 ![workflow](https://github.com/Fallen-Breath/fast-ip-ping/actions/workflows/gradle.yml/badge.svg)
 
+![pinging](pinging.gif)
+
 Yeet the laggy reversed DNS lookup for pure IP server addresses
 
 Extracted from the `yeetServerIpReversedDnsLookup` option in [TweakerMore](https://github.com/Fallen-Breath/tweakermore) Mod

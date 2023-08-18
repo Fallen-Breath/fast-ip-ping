@@ -22,6 +22,7 @@ package me.fallenbreath.fastipping.mixins;
 
 import net.minecraft.client.network.AddressResolver;
 import me.fallenbreath.fastipping.impl.InetAddressPatcher;
+import net.minecraft.client.network.ServerAddress;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -29,9 +30,18 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+//#if FORGE
+//$$ import net.minecraft.client.network.Address;
+//$$ import org.spongepowered.asm.mixin.Overwrite;
+//$$ import java.net.InetSocketAddress;
+//$$ import java.util.Optional;
+//#endif
+
 // used in mc >= 1.17
+
+//#if FABRIC
 @Mixin(AddressResolver.class)
-public abstract class AddressResolverMixin
+public interface AddressResolverMixin
 {
 	@ModifyVariable(
 			method = "method_36903",
@@ -42,8 +52,39 @@ public abstract class AddressResolverMixin
 			),
 			remap = false
 	)
-	private static InetAddress setHostnameToIpAddressToAvoidReversedDnsLookupOnGetHostname(InetAddress inetAddress, String hostName) throws UnknownHostException
+	private static InetAddress setHostnameToIpAddressToAvoidReversedDnsLookupOnGetHostname(InetAddress inetAddress, ServerAddress address) throws UnknownHostException
 	{
-		return InetAddressPatcher.patch(hostName, inetAddress);
+		return InetAddressPatcher.patch(address.getAddress(), inetAddress);
 	}
 }
+//#endif
+
+//#if FORGE
+//$$ @Mixin(value = AddressResolver.class, priority = 200)
+//$$ public interface AddressResolverMixin
+//$$ {
+//$$ 	/**
+//$$ 	 * @author Fallen_Breath
+//$$ 	 * @reason Forge does not support interface mixin. Here's a vanilla copy one, with manual "@ModifyVariable"
+//$$ 	 */
+//$$ 	@Overwrite
+//$$	@SuppressWarnings("target")
+//$$ 	static Optional<Address> method_36903(ServerAddress address)
+//$$ 	{
+//$$ 		try
+//$$ 		{
+//$$ 			InetAddress inetAddress = InetAddress.getByName(address.getAddress());
+//$$
+//$$ 			// @ModifyVariable
+//$$ 			inetAddress = InetAddressPatcher.patch(address.getAddress(), inetAddress);
+//$$
+//$$ 			return Optional.of(Address.create(new InetSocketAddress(inetAddress, address.getPort())));
+//$$ 		}
+//$$ 		catch (UnknownHostException var2)
+//$$ 		{
+//$$ 			AddressResolver.LOGGER.debug("Couldn't resolve server {} address", address.getAddress(), var2);
+//$$ 			return Optional.empty();
+//$$ 		}
+//$$ 	}
+//$$ }
+//#endif
