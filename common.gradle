@@ -51,7 +51,7 @@ dependencies {
 }
 
 loom {
-	runConfigs.all {
+	runConfigs.client {
 		// to make sure it generates all "Minecraft Client (:subproject_name)" applications
 		ideConfigGenerated = true
 		runDir '../../run'
@@ -60,7 +60,7 @@ loom {
 
 	if (mod_brand == 'forge') {
 		forge {
-			mixinConfigs = ["template_mod.mixins.json"]
+			mixinConfigs = ["fastipping.mixins.json"]
 		}
 	}
 }
@@ -124,14 +124,14 @@ processResources {
 
 	if (mod_brand == 'forge') {
 		// forge requires the mod icon file to be at the resource root
-        filesMatching('assets/template_mod/icon.png') { f -> f.path = 'icon.png' }
+        filesMatching('assets/fastipping/icon.png') { f -> f.path = 'icon.png' }
 	}
 }
 
 // https://github.com/Fallen-Breath/yamlang
 yamlang {
 	targetSourceSets = [sourceSets.main]
-	inputDir = 'assets/template_mod/lang'
+	inputDir = 'assets/fastipping/lang'
 }
 
 // ensure that the encoding is set to UTF-8, no matter what the system default is

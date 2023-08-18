@@ -6,10 +6,10 @@ license = "LGPLv3"
 modId = "${id}"
 version = "${version}"
 displayName = "${name}"
-displayURL = "https://github.com/Fallen-Breath/fabric-mod-template"
+displayURL = "https://github.com/Fallen-Breath/fast-ip-ping"
 authors = "Fallen_Breath"
 description = '''
-Template for my fabric mods
+Yeet the laggy reversed DNS lookup for pure IP server addresses
 '''
 logoFile = "icon.png"
 
@@ -18,4 +18,4 @@ modId = "minecraft"
 mandatory = true
 versionRange = "${minecraft_dependency}"
 ordering = "NONE"
-side = "BOTH"
+side = "CLIENT"

@@ -4,25 +4,22 @@
   "version": "${version}",
 
   "name": "${name}",
-  "description": "Template for my fabric mods",
+  "description": "Yeet the laggy reversed DNS lookup for pure IP server addresses",
   "authors": [
     "Fallen_Breath"
   ],
   "contact": {
     "homepage": "https://modrinth.com",
-    "sources": "https://github.com/Fallen-Breath/fabric-mod-template"
+    "sources": "https://github.com/Fallen-Breath/fast-ip-ping"
   },
 
-  "icon": "assets/template_mod/icon.png",
+  "icon": "assets/fastipping/icon.png",
 
-  "environment": "*",
+  "environment": "client",
   "entrypoints": {
-    "main": [
-      "me.fallenbreath.template_mod.TemplateMod"
-    ]
   },
   "mixins": [
-    "template_mod.mixins.json"
+    "fastipping.mixins.json"
   ],
 
   "depends": {

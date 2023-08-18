@@ -1,10 +1,12 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "me.fallenbreath.template_mod.mixins",
+  "package": "me.fallenbreath.fastipping.mixins",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "MinecraftServerMixin"
+    "AddressResolverMixin",
+    "ConnectScreenThreadMixin",
+    "MultiplayerServerListPingerMixin"
   ],
   "client": [
   ],
