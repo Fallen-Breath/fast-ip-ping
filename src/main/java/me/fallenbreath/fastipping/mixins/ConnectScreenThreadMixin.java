@@ -22,32 +22,47 @@ package me.fallenbreath.fastipping.mixins;
 
 import me.fallenbreath.fastipping.impl.InetAddressPatcher;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 // used in mc < 1.17
-// FIXME: warning MIXIN_SOFT_TARGET_NOT_RESOLVED in mc1.16 forge
-@Mixin(targets = "net.minecraft.client.gui.screen.ConnectScreen$1")
+
+// architectury-loom does not correctly maintain the name of the anonymous class in mc1.16.5 forge,
+// it uses ConnectScreen$1 in development env, but it's ConnectingScreen$1 in compiling/production env.
+// we have to manually fix that :(
+
+//#if 11600 <= MC && MC < 11700 && FORGE
+//$$ @SuppressWarnings("unresolvable-target")
+//#endif
+@Mixin(
+		targets = {
+				//#if 11600 <= MC && MC < 11700 && FORGE
+				//$$ "net.minecraft.client.gui.screen.ConnectingScreen$1",
+				//#endif
+				"net.minecraft.client.gui.screen.ConnectScreen$1"
+		}
+)
 public abstract class ConnectScreenThreadMixin
 {
-	@Shadow
-	private String field_2414;  // The captured "address" variable
-
-	@ModifyVariable(
+	@Redirect(
 			method = "run",
 			at = @At(
-					value = "INVOKE_ASSIGN",
-					target = "Ljava/net/InetAddress;getByName(Ljava/lang/String;)Ljava/net/InetAddress;",
-					shift = At.Shift.AFTER
+					value = "INVOKE",
+					target = "Ljava/net/InetAddress;getByName(Ljava/lang/String;)Ljava/net/InetAddress;"
 			),
 			remap = false
 	)
-	private InetAddress setHostnameToIpAddressToAvoidReversedDnsLookupOnGetHostname_connect(InetAddress inetAddress) throws UnknownHostException
+	private InetAddress setHostnameToIpAddressToAvoidReversedDnsLookupOnGetHostname_connect(String address) throws UnknownHostException
 	{
-		return InetAddressPatcher.patch(this.field_2414, inetAddress);
+		// vanilla
+		InetAddress inetAddress = InetAddress.getByName(address);
+
+		// patch it
+		inetAddress = InetAddressPatcher.patch(address, inetAddress);
+
+		return inetAddress;
 	}
 }

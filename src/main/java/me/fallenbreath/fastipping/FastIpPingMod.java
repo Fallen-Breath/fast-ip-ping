@@ -39,6 +39,6 @@ public class FastIpPingMod
 	//$$ public FastIpPingMod()
 	//#endif
 	{
-		LOGGER.info("ping fast!");
+		LOGGER.info("ping & connect fast!");
 	}
 }

@@ -22,12 +22,9 @@ package me.fallenbreath.fastipping.mixins;
 
 import me.fallenbreath.fastipping.impl.InetAddressPatcher;
 import net.minecraft.client.network.MultiplayerServerListPinger;
-import net.minecraft.network.ServerAddress;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -36,32 +33,21 @@ import java.net.UnknownHostException;
 @Mixin(MultiplayerServerListPinger.class)
 public abstract class MultiplayerServerListPingerMixin
 {
-	@Unique
-	private final ThreadLocal<ServerAddress> currentServerAddress = ThreadLocal.withInitial(() -> null);
-
-	@ModifyVariable(
-			method = "add",
-			at = @At(
-					value = "INVOKE_ASSIGN",
-					target = "Lnet/minecraft/network/ServerAddress;parse(Ljava/lang/String;)Lnet/minecraft/network/ServerAddress;",
-					shift = At.Shift.AFTER
-			)
-	)
-	private ServerAddress setHostnameToIpAddressToAvoidReversedDnsLookupOnGetHostname_ping(ServerAddress serverAddress)
-	{
-		this.currentServerAddress.set(serverAddress);
-		return serverAddress;
-	}
-
-	@ModifyArg(
+	@Redirect(
 			method = "add",
 			at = @At(
 					value = "INVOKE",
-					target = "Lnet/minecraft/network/ClientConnection;connect(Ljava/net/InetAddress;IZ)Lnet/minecraft/network/ClientConnection;"
+					target = "Ljava/net/InetAddress;getByName(Ljava/lang/String;)Ljava/net/InetAddress;"
 			)
 	)
-	private InetAddress setHostnameToIpAddressToAvoidReversedDnsLookupOnGetHostname_ping(InetAddress inetAddress) throws UnknownHostException
+	private InetAddress setHostnameToIpAddressToAvoidReversedDnsLookupOnGetHostname_ping(String address) throws UnknownHostException
 	{
-		return InetAddressPatcher.patch(this.currentServerAddress.get().getAddress(), inetAddress);
+		// vanilla
+		InetAddress inetAddress = InetAddress.getByName(address);
+
+		// patch it
+		inetAddress = InetAddressPatcher.patch(address, inetAddress);
+
+		return inetAddress;
 	}
 }
