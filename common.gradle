@@ -1,7 +1,6 @@
 apply plugin: 'maven-publish'
 apply plugin: 'com.github.hierynomus.license'
 apply plugin: 'dev.architectury.loom'
-apply plugin: 'io.github.juuxel.loom-quiltflower'
 apply plugin: 'com.replaymod.preprocess'
 apply plugin: 'me.fallenbreath.yamlang'
 
@@ -50,8 +49,8 @@ dependencies {
 //	}
 }
 
+String MOD_ICON_PATH = 'assets/fastipping/icon.png'
 String MIXIN_CONFIG_PATH = 'fastipping.mixins.json'
-String ICON_PATH = 'assets/fastipping/icon.png'
 String LANG_DIR = 'assets/fastipping/lang'
 JavaVersion JAVA_COMPATIBILITY
 if (mcVersion >= 11800) {
@@ -81,21 +80,24 @@ remapJar {
 	remapperIsolation = true
 }
 
-sourceCompatibility = JAVA_COMPATIBILITY
-targetCompatibility = JAVA_COMPATIBILITY
-
 String versionSuffix = ''
 // detect github action environment variables
 // https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
 if (System.getenv("BUILD_RELEASE") != "true") {
 	String buildNumber = System.getenv("BUILD_ID")
-	versionSuffix += buildNumber != null ? ('+build.' + buildNumber) : '-SHAPSHOT'
+	versionSuffix += buildNumber != null ? ('+build.' + buildNumber) : '-SNAPSHOT'
 }
 String fullModVersion = project.mod_version + versionSuffix
 
-version = 'v' + fullModVersion
 group = project.maven_group
-archivesBaseName = project.archives_base_name + '-mc' + project.minecraft_version + '-' + mod_brand
+if (System.getenv("JITPACK") == "true") {
+	// move mc version into archivesBaseName, so jitpack will be able to organize archives from multiple subprojects correctly
+	base.archivesName = project.archives_base_name + '-mc' + project.minecraft_version + '-' + mod_brand
+	version = 'v' + fullModVersion
+} else {
+	base.archivesName = project.archives_base_name
+	version = 'mc' + project.minecraft_version + '-' + mod_brand + '-v' + fullModVersion
+}
 
 // See https://youtrack.jetbrains.com/issue/IDEA-296490
 // if IDEA complains about "Cannot resolve resource filtering of MatchingCopyAction" and you want to know why
@@ -127,12 +129,12 @@ processResources {
 	}
 
 	filesMatching(MIXIN_CONFIG_PATH) {
-		expand "compatibility_level": "JAVA_${JAVA_COMPATIBILITY.ordinal() + 1}"
+		filter { s -> s.replace('{{COMPATIBILITY_LEVEL}}', "JAVA_${JAVA_COMPATIBILITY.ordinal() + 1}") }
 	}
 
 	if (mod_brand == 'forge') {
 		// forge requires the mod icon file to be at the resource root
-        filesMatching(ICON_PATH) { f -> f.path = new File(ICON_PATH).name }
+		filesMatching(MOD_ICON_PATH) { f -> f.path = new File(f.path).getName() }
 	}
 }
 
@@ -150,6 +152,9 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 java {
+	sourceCompatibility = JAVA_COMPATIBILITY
+	targetCompatibility = JAVA_COMPATIBILITY
+
 	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
 	// if it is present.
 	// If you remove this line, sources will not be generated.
@@ -201,7 +206,7 @@ testClasses.dependsOn licenseFormatTest
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
-			artifactId archivesBaseName
+			artifactId base.archivesName.get()
 
 			from components.java
 		}
@@ -209,7 +214,17 @@ publishing {
 
 	// select the repositories you want to publish to
 	repositories {
-		// uncomment to publish to the local maven
 		// mavenLocal()
+
+		maven {
+			url = version.endsWith("SNAPSHOT") ? "https://maven.fallenbreath.me/snapshots" : "https://maven.fallenbreath.me/releases"
+			credentials(PasswordCredentials) {
+				username = 'fallen'
+				password = System.getenv("FALLENS_MAVEN_TOKEN")
+			}
+			authentication {
+				basic(BasicAuthentication)
+			}
+		}
 	}
 }
