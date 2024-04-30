@@ -2,8 +2,8 @@
 
 [![License](https://img.shields.io/github/license/Fallen-Breath/fast-ip-ping.svg)](http://www.gnu.org/licenses/lgpl-3.0.html)
 [![workflow](https://github.com/Fallen-Breath/fast-ip-ping/actions/workflows/gradle.yml/badge.svg)](https://github.com/Fallen-Breath/fast-ip-ping/actions/workflows/gradle.yml)
-[![MC Versions](https://cf.way2muchnoise.eu/versions/For%20MC_fast-ip-ping_all.svg)](https://www.curseforge.com/minecraft/mc-mods/fast-ip-ping)
-[![CurseForge](https://cf.way2muchnoise.eu/full_fast-ip-ping_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/fast-ip-ping)
+[![MC Versions](https://cf.way2muchnoise.eu/versions/For%20MC_fast-ip-ping_all.svg)](https://legacy.curseforge.com/minecraft/mc-mods/fast-ip-ping)
+[![CurseForge](https://cf.way2muchnoise.eu/full_fast-ip-ping_downloads.svg)](https://legacy.curseforge.com/minecraft/mc-mods/fast-ip-ping)
 [![Modrinth](https://img.shields.io/modrinth/dt/9mtu0sUO?label=Modrinth%20Downloads)](https://modrinth.com/mod/fast-ip-ping)
 
 ![pinging](pinging.gif)
