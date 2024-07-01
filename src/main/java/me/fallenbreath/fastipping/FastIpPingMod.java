@@ -24,7 +24,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 //#if FORGE
-//$$ @net.minecraftforge.fml.common.Mod("fastipping")
+//$$ import net.minecraftforge.fml.common.Mod;
+//#elseif NEOFORGE
+//$$ import net.neoforged.fml.common.Mod;
+//#endif
+
+//#if FORGE_LIKE
+//$$ @Mod("fastipping")
 //#endif
 public class FastIpPingMod
 		//#if FABRIC
@@ -35,7 +41,7 @@ public class FastIpPingMod
 
 	//#if FABRIC
 	@Override public void onInitialize()
-	//#elseif FORGE
+	//#elseif FORGE_LIKE
 	//$$ public FastIpPingMod()
 	//#endif
 	{

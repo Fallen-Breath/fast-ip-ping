@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-//#if FORGE
+//#if FORGE_LIKE
 //$$ import net.minecraft.client.network.Address;
 //$$ import org.spongepowered.asm.mixin.Overwrite;
 //$$ import java.net.InetSocketAddress;
@@ -59,7 +59,7 @@ public interface AddressResolverMixin
 }
 //#endif
 
-//#if FORGE
+//#if FORGE_LIKE
 //$$ @Mixin(value = AddressResolver.class, priority = 200)
 //$$ public interface AddressResolverMixin
 //$$ {
