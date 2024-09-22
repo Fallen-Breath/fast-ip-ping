@@ -14,12 +14,12 @@ Extracted from the `yeetServerIpReversedDnsLookup` option in [TweakerMore](https
 
 ### What & Why & How
 
-For servers whose addresses are represented solely by IP, e.g. `192.168.2.10:25565`, disable reverse DNS lookups in the corresponding `InetAddress` object
+For servers whose addresses are represented solely by a literal IP, e.g. `192.168.2.10:25565`, disable reverse DNS lookups in the corresponding `InetAddress` object
 
 Many non-loopback IPs lack associated domain names, which makes reverse lookups time-consuming
 
 ```java
-// java.net.InetAddress.getHostName(boolean)
+// java.net.InetAddress#getHostName(boolean)
 String getHostName(boolean check) {
     if (holder().getHostName() == null) {  // It will be null if InetAddress.getByName() received a literal IP
         holder().hostName = InetAddress.getHostFromNameService(this, check);  // <-- takes forever
@@ -38,4 +38,4 @@ This results in a 1s ~ 5s reduction in time for servers with literal IP address.
 ### Environment
 
 - Client-side only
-- Fabric / Forge mod loader. No extra requirement is needed
+- Fabric / Forge / NeoForge mod loader. No extra requirement is needed
