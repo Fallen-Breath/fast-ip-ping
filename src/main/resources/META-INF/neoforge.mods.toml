@@ -10,7 +10,7 @@ displayName = "${name}"
 displayURL = "https://github.com/Fallen-Breath/fast-ip-ping"
 authors = "Fallen_Breath"
 description = '''
-Yeet the laggy reversed DNS lookup for pure IP server addresses
+Yeet the laggy reversed DNS lookup for literal IP server addresses
 '''
 logoFile = "icon.png"
 

@@ -4,7 +4,7 @@
   "version": "${version}",
 
   "name": "${name}",
-  "description": "Yeet the laggy reversed DNS lookup for pure IP server addresses",
+  "description": "Yeet the laggy reversed DNS lookup for literal IP server addresses",
   "authors": [
     "Fallen_Breath"
   ],
