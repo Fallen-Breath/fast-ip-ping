@@ -1,17 +1,19 @@
 plugins {
 	id 'maven-publish'
 	id 'com.github.hierynomus.license' version '0.16.1' apply false
-    id 'dev.architectury.loom' version '1.7-SNAPSHOT' apply false
+    id 'dev.architectury.loom' version '1.10-SNAPSHOT' apply false
 
 	// https://github.com/ReplayMod/preprocessor
 	// https://github.com/Fallen-Breath/preprocessor
-	id 'com.replaymod.preprocess' version 'ce1aeb2b'
+	id 'com.replaymod.preprocess' version '0a04a5668b'
 
 	// https://github.com/Fallen-Breath/yamlang
-	id 'me.fallenbreath.yamlang' version '1.4.0' apply false
+	id 'me.fallenbreath.yamlang' version '1.4.1' apply false
 }
 
 preprocess {
+    strictExtraMappings = false
+
 	def mc114_fabric = createNode('1.14.4-fabric', 1_14_04, '')
 	def mc115_fabric = createNode('1.15.2-fabric', 1_15_02, '')
 	def mc116_fabric = createNode('1.16.5-fabric', 1_16_05, '')
@@ -20,7 +22,11 @@ preprocess {
 	def mc119_fabric = createNode('1.19.4-fabric', 1_19_04, '')
 	def mc1204_fabric = createNode('1.20.4-fabric', 1_20_04, '')
 	def mc1206_fabric = createNode('1.20.6-fabric', 1_20_06, '')
-	def mc121_fabric = createNode('1.21.1-fabric', 1_21_01, '')
+    def mc1211_fabric = createNode('1.21.1-fabric', 1_21_01, '')
+    def mc1213_fabric = createNode('1.21.3-fabric', 1_21_03, '')
+    def mc1214_fabric = createNode('1.21.4-fabric', 1_21_04, '')
+    def mc1215_fabric = createNode('1.21.5-fabric', 1_21_05, '')
+    def mc1216_fabric = createNode('1.21.6-fabric', 1_21_05, '')
 
     def mc115_forge = createNode('1.15.2-forge' , 1_15_02, '')
     def mc116_forge = createNode('1.16.5-forge' , 1_16_05, '')
@@ -29,10 +35,17 @@ preprocess {
     def mc119_forge = createNode('1.19.4-forge' , 1_19_04, '')
     def mc1204_forge = createNode('1.20.4-forge' , 1_20_04, '')
     def mc1206_forge = createNode('1.20.6-forge' , 1_20_06, '')
-    def mc121_forge = createNode('1.21.1-forge' , 1_21_01, '')
+    def mc1211_forge = createNode('1.21.1-forge', 1_21_01, '')
+    def mc1213_forge = createNode('1.21.3-forge', 1_21_03, '')
+    def mc1214_forge = createNode('1.21.4-forge', 1_21_04, '')
+    def mc1215_forge = createNode('1.21.5-forge', 1_21_05, '')
 
-	def mc1206_neoforge = createNode('1.20.6-neoforge', 1_20_06, '')
-	def mc121_neoforge = createNode('1.21.1-neoforge', 1_21_01, '')
+    def mc1206_neoforge = createNode('1.20.6-neoforge', 1_20_06, '')
+    def mc1211_neoforge = createNode('1.21.1-neoforge', 1_21_01, '')
+    def mc1213_neoforge = createNode('1.21.3-neoforge', 1_21_03, '')
+    def mc1214_neoforge = createNode('1.21.4-neoforge', 1_21_04, '')
+    def mc1215_neoforge = createNode('1.21.5-neoforge', 1_21_05, '')
+    def mc1216_neoforge = createNode('1.21.6-neoforge', 1_21_05, '')
 
 	mc114_fabric.link(mc115_fabric, null)
 	mc115_fabric.link(mc116_fabric, null)
@@ -40,20 +53,31 @@ preprocess {
 	mc117_fabric.link(mc118_fabric, null)
 	mc118_fabric.link(mc119_fabric, null)
 	mc119_fabric.link(mc1204_fabric, null)
-	mc1204_fabric.link(mc1206_fabric, null)
-	mc1206_fabric.link(mc121_fabric, null)
+    mc1204_fabric.link(mc1206_fabric, null)
+    mc1206_fabric.link(mc1211_fabric , null)
+    mc1211_fabric.link(mc1213_fabric , null)
+    mc1213_fabric.link(mc1214_fabric , null)
+    mc1214_fabric.link(mc1215_fabric , null)
+    mc1215_fabric.link(mc1216_fabric , null)
 
 	mc115_fabric.link(mc115_forge, null)
 	mc116_fabric.link(mc116_forge, null)
 	mc117_fabric.link(mc117_forge, null)
 	mc118_fabric.link(mc118_forge, null)
 	mc119_fabric.link(mc119_forge, null)
-	mc1204_fabric.link(mc1204_forge, null)
-	mc1206_fabric.link(mc1206_forge, null)
-	mc121_fabric.link(mc121_forge, null)
+    mc1204_fabric.link(mc1204_forge, null)
+    mc1206_fabric.link(mc1206_forge, null)
+    mc1211_fabric.link(mc1211_forge, null)
+    mc1213_fabric.link(mc1213_forge, null)
+    mc1214_fabric.link(mc1214_forge, null)
+    mc1215_fabric.link(mc1215_forge, null)
 
-	mc1206_fabric.link(mc1206_neoforge, null)
-	mc121_fabric.link(mc121_neoforge, null)
+    mc1206_fabric.link(mc1206_neoforge, null)
+    mc1211_fabric.link(mc1211_neoforge, null)
+    mc1213_fabric.link(mc1213_neoforge, null)
+    mc1214_fabric.link(mc1214_neoforge, null)
+    mc1215_fabric.link(mc1215_neoforge, null)
+    mc1216_fabric.link(mc1216_neoforge, null)
 }
 
 tasks.register('buildAndGather') {
@@ -75,7 +99,7 @@ tasks.register('buildAndGather') {
 					exclude '*-dev.jar', '*-sources.jar'
 				}
 				into buildLibs(rootProject)
-				duplicatesStrategy DuplicatesStrategy.INCLUDE
+				duplicatesStrategy = DuplicatesStrategy.INCLUDE
 			}
 		}
 	}

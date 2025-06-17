@@ -8,11 +8,8 @@ def mod_brand = (loom.platform.get() as String).toLowerCase()
 assert mod_brand in ['fabric', 'forge', 'neoforge']
 assert project.name.endsWith('-' + mod_brand)  // optional check
 
-int mcVersion = 1
+int mcVersion = project.mcVersion
 preprocess {
-	mcVersion = vars.get()["MC"] as int
-	tabIndentation = true
-
 	vars.put("MC", mcVersion)
 	vars.put("FABRIC", mod_brand == 'fabric' ? 1 : 0)
 	vars.put("FORGE", mod_brand == 'forge' ? 1 : 0)
@@ -22,13 +19,13 @@ preprocess {
 
 repositories {
 	maven {
-		url 'https://jitpack.io'
+		url = 'https://jitpack.io'
 	}
 	maven {
-		url 'https://www.cursemaven.com'
+        url = 'https://maven.fallenbreath.me/releases'
 	}
 	maven {
-		url 'https://maven.neoforged.net/releases'
+		url = 'https://maven.neoforged.net/releases'
 	}
 }
 
@@ -92,10 +89,6 @@ loom {
 			mixinConfigs = [MIXIN_CONFIG_PATH]
 		}
 	}
-}
-
-remapJar {
-	remapperIsolation = true
 }
 
 String modVersionSuffix = ''
@@ -166,6 +159,12 @@ processResources {
 			}
 		} else {
 			exclude path
+		}
+	}
+	if (mod_brand == 'neoforge' && mcVersion < 12005) {
+		// neoforge for mc < 1.21.5 still uses the old "mods.toml"
+		filesMatching('META-INF/neoforge.mods.toml') { f ->
+			f.path = 'META-INF/mods.toml'
 		}
 	}
 
@@ -252,9 +251,9 @@ testClasses.dependsOn licenseFormatTest
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
-			artifactId base.archivesName.get()
 			from components.java
-            version = fullArtifactVersion
+			artifactId = base.archivesName.get()
+			version = fullArtifactVersion
 		}
 	}
 
