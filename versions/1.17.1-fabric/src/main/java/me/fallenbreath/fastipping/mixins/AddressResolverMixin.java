@@ -20,9 +20,9 @@
 
 package me.fallenbreath.fastipping.mixins;
 
-import net.minecraft.client.network.AddressResolver;
+import net.minecraft.client.multiplayer.resolver.ServerAddressResolver;
 import me.fallenbreath.fastipping.impl.InetAddressPatcher;
-import net.minecraft.client.network.ServerAddress;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -31,7 +31,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 //#if FORGE_LIKE
-//$$ import net.minecraft.client.network.Address;
+//$$ import net.minecraft.client.multiplayer.resolver.ResolvedServerAddress;
 //$$ import org.spongepowered.asm.mixin.Overwrite;
 //$$ import java.net.InetSocketAddress;
 //$$ import java.util.Optional;
@@ -40,7 +40,7 @@ import java.net.UnknownHostException;
 // used in mc >= 1.17
 
 //#if FABRIC
-@Mixin(AddressResolver.class)
+@Mixin(ServerAddressResolver.class)
 public interface AddressResolverMixin
 {
 	@ModifyVariable(
@@ -54,13 +54,13 @@ public interface AddressResolverMixin
 	)
 	private static InetAddress setHostnameToIpAddressToAvoidReversedDnsLookupOnGetHostname(InetAddress inetAddress, ServerAddress address) throws UnknownHostException
 	{
-		return InetAddressPatcher.patch(address.getAddress(), inetAddress);
+		return InetAddressPatcher.patch(address.getHost(), inetAddress);
 	}
 }
 //#endif
 
 //#if FORGE_LIKE
-//$$ @Mixin(value = AddressResolver.class, priority = 200)
+//$$ @Mixin(value = ServerAddressResolver.class, priority = 200)
 //$$ public interface AddressResolverMixin
 //$$ {
 //$$ 	/**
@@ -69,20 +69,20 @@ public interface AddressResolverMixin
 //$$ 	 */
 //$$ 	@Overwrite
 //$$	@SuppressWarnings("target")
-//$$ 	static Optional<Address> method_36903(ServerAddress address)
+//$$ 	static Optional<ResolvedServerAddress> method_36903(ServerAddress address)
 //$$ 	{
 //$$ 		try
 //$$ 		{
-//$$ 			InetAddress inetAddress = InetAddress.getByName(address.getAddress());
+//$$ 			InetAddress inetAddress = InetAddress.getByName(address.getHost());
 //$$
 //$$ 			// @ModifyVariable
-//$$ 			inetAddress = InetAddressPatcher.patch(address.getAddress(), inetAddress);
+//$$ 			inetAddress = InetAddressPatcher.patch(address.getHost(), inetAddress);
 //$$
-//$$ 			return Optional.of(Address.create(new InetSocketAddress(inetAddress, address.getPort())));
+//$$ 			return Optional.of(ResolvedServerAddress.from(new InetSocketAddress(inetAddress, address.getPort())));
 //$$ 		}
 //$$ 		catch (UnknownHostException var2)
 //$$ 		{
-//$$ 			AddressResolver.LOGGER.debug("Couldn't resolve server {} address", address.getAddress(), var2);
+//$$ 			ServerAddressResolver.LOGGER.debug("Couldn't resolve server {} address", address.getHost(), var2);
 //$$ 			return Optional.empty();
 //$$ 		}
 //$$ 	}

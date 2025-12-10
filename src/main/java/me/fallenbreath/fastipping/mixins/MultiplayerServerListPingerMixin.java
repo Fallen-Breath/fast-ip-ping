@@ -21,7 +21,7 @@
 package me.fallenbreath.fastipping.mixins;
 
 import me.fallenbreath.fastipping.impl.InetAddressPatcher;
-import net.minecraft.client.network.MultiplayerServerListPinger;
+import net.minecraft.client.multiplayer.ServerStatusPinger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -30,11 +30,11 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 // used in mc < 1.17
-@Mixin(MultiplayerServerListPinger.class)
+@Mixin(ServerStatusPinger.class)
 public abstract class MultiplayerServerListPingerMixin
 {
 	@Redirect(
-			method = "add",
+			method = "pingServer",
 			at = @At(
 					value = "INVOKE",
 					target = "Ljava/net/InetAddress;getByName(Ljava/lang/String;)Ljava/net/InetAddress;"

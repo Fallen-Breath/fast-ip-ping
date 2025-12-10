@@ -29,22 +29,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 // used in mc < 1.17
-
-// architectury-loom does not correctly maintain the name of the anonymous class in mc1.16.5 forge,
-// it uses ConnectScreen$1 in development env, but it's ConnectingScreen$1 in compiling/production env.
-// we have to manually fix that :(
-
-//#if 11600 <= MC && MC < 11700 && FORGE
-//$$ @SuppressWarnings("unresolvable-target")
-//#endif
-@Mixin(
-		targets = {
-				//#if 11600 <= MC && MC < 11700 && FORGE
-				//$$ "net.minecraft.client.gui.screen.ConnectingScreen$1",
-				//#endif
-				"net.minecraft.client.gui.screen.ConnectScreen$1"
-		}
-)
+@Mixin(targets = "net.minecraft.client.gui.screens.ConnectScreen$1")
 public abstract class ConnectScreenThreadMixin
 {
 	@Redirect(
