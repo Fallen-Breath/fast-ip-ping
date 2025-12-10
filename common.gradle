@@ -19,6 +19,9 @@ preprocess {
 
 repositories {
 	maven {
+		url = 'https://maven.parchmentmc.org'
+	}
+	maven {
 		url = 'https://jitpack.io'
 	}
 	maven {
@@ -37,14 +40,12 @@ configurations {
 dependencies {
 	// loom
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings loom.layered {
-		mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-
-		// https://github.com/architectury/architectury-loom/issues/214
-		if (mod_brand == 'neoforge' && project.hasProperty('yarn_mappings_patch')) {
-			it.mappings("dev.architectury:yarn-mappings-patch-neoforge:${project.yarn_mappings_patch}")
-		}
-	}
+    mappings loom.layered() {
+        officialMojangMappings()
+        if (project.parchment_version.size() > 0) {
+            parchment("org.parchmentmc.data:parchment-${project.minecraft_version}:${project.parchment_version}@zip")
+        }
+    }
 
 	if (mod_brand == 'fabric') {
 		modImplementation "net.fabricmc:fabric-loader:${project.fabric_loader_version}"
