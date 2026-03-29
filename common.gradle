@@ -1,6 +1,9 @@
+final int mcVersion = project.mcVersion
+final boolean unobfuscated = mcVersion >= 26_00_00
+
 apply plugin: 'maven-publish'
 apply plugin: 'com.github.hierynomus.license'
-apply plugin: 'dev.architectury.loom'
+apply plugin: unobfuscated ? 'net.fabricmc.fabric-loom' : 'dev.architectury.loom'
 apply plugin: 'com.replaymod.preprocess'
 apply plugin: 'me.fallenbreath.yamlang'
 
@@ -8,7 +11,6 @@ def mod_brand = (loom.platform.get() as String).toLowerCase()
 assert mod_brand in ['fabric', 'forge', 'neoforge']
 assert project.name.endsWith('-' + mod_brand)  // optional check
 
-int mcVersion = project.mcVersion
 preprocess {
 	vars.put("MC", mcVersion)
 	vars.put("FABRIC", mod_brand == 'fabric' ? 1 : 0)
@@ -20,35 +22,48 @@ preprocess {
 repositories {
 	maven {
 		url = 'https://maven.parchmentmc.org'
+		content { includeGroup('org.parchmentmc.data') }
 	}
 	maven {
 		url = 'https://jitpack.io'
+		content { includeGroupAndSubgroups('com.github') }
 	}
 	maven {
-        url = 'https://maven.fallenbreath.me/releases'
+		url = 'https://maven.fallenbreath.me/releases'
+		content { includeGroup('me.fallenbreath') }
 	}
 	maven {
 		url = 'https://maven.neoforged.net/releases'
 	}
 }
 
-// https://github.com/FabricMC/fabric-loader/issues/783
-configurations {
-	modRuntimeOnly.exclude group: 'net.fabricmc', module: 'fabric-loader'
-}
-
 dependencies {
+	def processDependency = { dep ->
+		// https://github.com/FabricMC/fabric-loader/issues/783
+		if (dep instanceof ModuleDependency) {
+			if (!(dep.group == 'net.fabricmc' && dep.name == 'fabric-loader')) {
+				dep.exclude group: 'net.fabricmc', module: 'fabric-loader'
+			}
+		}
+		return dep
+	}
+	def autoImplementation = { Object... args -> processDependency(unobfuscated ? implementation(*args) : modImplementation(*args)) }
+	def autoRuntimeOnly = { Object... args -> processDependency(unobfuscated ? runtimeOnly(*args) : modRuntimeOnly(*args)) }
+	def autoCompileOnly = { Object... args -> processDependency(unobfuscated ? compileOnly(*args) : modCompileOnly(*args)) }
+
 	// loom
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings loom.layered() {
-        officialMojangMappings()
-        if (project.parchment_version.size() > 0) {
-            parchment("org.parchmentmc.data:parchment-${project.minecraft_version}:${project.parchment_version}@zip")
-        }
-    }
+	if (!unobfuscated) {
+		mappings loom.layered() {
+			officialMojangMappings()
+			if (project.parchment_version.size() > 0) {
+				parchment("org.parchmentmc.data:parchment-${project.minecraft_version}:${project.parchment_version}@zip")
+			}
+		}
+	}
 
 	if (mod_brand == 'fabric') {
-		modImplementation "net.fabricmc:fabric-loader:${project.fabric_loader_version}"
+		autoImplementation "net.fabricmc:fabric-loader:${project.fabric_loader_version}"
 	} else if (mod_brand == 'forge') {
 		forge "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
 	} else if (mod_brand == 'neoforge') {
@@ -57,7 +72,7 @@ dependencies {
 
 	// runtime mods
 	if (mcVersion < 11904 && mod_brand == 'fabric') {
-		modRuntimeOnly(mcVersion < 11900 ? "com.github.astei:lazydfu:0.1.2" : "com.github.Fallen-Breath:lazydfu:a7cfc44c0c")
+		autoRuntimeOnly(mcVersion < 11900 ? "com.github.astei:lazydfu:0.1.2" : "com.github.Fallen-Breath:lazydfu:a7cfc44c0c")
 	}
 }
 
@@ -65,7 +80,9 @@ String MOD_ICON_PATH = 'assets/fastipping/icon.png'
 String MIXIN_CONFIG_PATH = 'fastipping.mixins.json'
 String LANG_DIR = 'assets/fastipping/lang'
 JavaVersion JAVA_COMPATIBILITY
-if (mcVersion >= 12005 && !(mcVersion < 12100 && mod_brand == 'forge')) {
+if (mcVersion >= 260000) {
+	JAVA_COMPATIBILITY = JavaVersion.VERSION_25
+} else if (mcVersion >= 12005 && !(mcVersion < 12100 && mod_brand == 'forge')) {
 	JAVA_COMPATIBILITY = JavaVersion.VERSION_21
 } else if (mcVersion >= 11800) {
 	JAVA_COMPATIBILITY = JavaVersion.VERSION_17
@@ -77,7 +94,7 @@ if (mcVersion >= 12005 && !(mcVersion < 12100 && mod_brand == 'forge')) {
 JavaVersion MIXIN_COMPATIBILITY_LEVEL = JAVA_COMPATIBILITY
 
 loom {
-    def commonVmArgs = ['-Dmixin.debug.export=true', '-Dmixin.debug.countInjections=true']
+	def commonVmArgs = ['-Dmixin.debug.export=true', '-Dmixin.debug.countInjections=true']
 	runConfigs.client {
 		// to make sure it generates all "Minecraft Client (:subproject_name)" applications
 		ideConfigGenerated = true
@@ -115,24 +132,27 @@ String fullProjectVersion, fullArtifactVersion
 
 group = project.maven_group
 if (System.getenv("JITPACK") == "true") {
-    // move mc version into archivesBaseName, so jitpack will be able to organize archives from multiple subprojects correctly
-    base.archivesName = project.archives_base_name + '-mc' + project.minecraft_version + '-' + mod_brand
-    fullProjectVersion = 'v' + project.mod_version + modVersionSuffix
-    fullArtifactVersion = artifactVersion + artifactVersionSuffix
+	// move mc version into archivesBaseName, so jitpack will be able to organize archives from multiple subprojects correctly
+	base.archivesName = project.archives_base_name + '-mc' + project.minecraft_version + '-' + mod_brand
+	fullProjectVersion = 'v' + project.mod_version + modVersionSuffix
+	fullArtifactVersion = artifactVersion + artifactVersionSuffix
 } else {
-    base.archivesName = project.archives_base_name
-    fullProjectVersion = 'v' + project.mod_version + '-mc' + project.minecraft_version + '-' + mod_brand + modVersionSuffix
-    fullArtifactVersion = artifactVersion + '-mc' + project.minecraft_version + '-' + mod_brand + artifactVersionSuffix
+	base.archivesName = project.archives_base_name
+	fullProjectVersion = 'v' + project.mod_version + '-mc' + project.minecraft_version + '-' + mod_brand + modVersionSuffix
+	fullArtifactVersion = artifactVersion + '-mc' + project.minecraft_version + '-' + mod_brand + artifactVersionSuffix
 }
 version = fullProjectVersion
 
 // See https://youtrack.jetbrains.com/issue/IDEA-296490
 // if IDEA complains about "Cannot resolve resource filtering of MatchingCopyAction" and you want to know why
 processResources {
-	inputs.property "id", project.mod_id
-	inputs.property "name", project.mod_name
-	inputs.property "version", fullModVersion
-	inputs.property "minecraft_dependency", project.minecraft_dependency
+	def modProperties = [
+			"id"                  : project.mod_id,
+			"name"                : project.mod_name,
+			"version"             : fullModVersion,
+			"minecraft_dependency": project.minecraft_dependency,
+	]
+	inputs.properties(modProperties)
 
 	def good_files = [] as Set
 	def all_files = [] as Set
@@ -150,13 +170,7 @@ processResources {
 		def path = it2 as String
 		if (good_files.contains(path)) {
 			filesMatching(path) {
-				def valueMap = [
-						"id": project.mod_id,
-						"name": project.mod_name,
-						"version": fullModVersion,
-						"minecraft_dependency": project.minecraft_dependency,
-				]
-				expand valueMap
+				expand modProperties
 			}
 		} else {
 			exclude path
@@ -172,11 +186,6 @@ processResources {
 	filesMatching(MIXIN_CONFIG_PATH) {
 		filter { s -> s.replace('{{COMPATIBILITY_LEVEL}}', "JAVA_${MIXIN_COMPATIBILITY_LEVEL.ordinal() + 1}") }
 	}
-
-	if (mod_brand == 'forge' || mod_brand == 'neoforge') {
-		// forge requires the mod icon file to be at the resource root
-		filesMatching(MOD_ICON_PATH) { f -> f.path = new File(f.path).getName() }
-	}
 }
 
 // https://github.com/Fallen-Breath/yamlang
@@ -190,11 +199,11 @@ yamlang {
 // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = "UTF-8"
-    options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked"
-    if (JAVA_COMPATIBILITY <= JavaVersion.VERSION_1_8) {
-        // suppressed "source/target value 8 is obsolete and will be removed in a future release"
-        options.compilerArgs << '-Xlint:-options'
-    }
+	options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked"
+	if (JAVA_COMPATIBILITY <= JavaVersion.VERSION_1_8) {
+		// suppressed "source/target value 8 is obsolete and will be removed in a future release"
+		options.compilerArgs << '-Xlint:-options'
+	}
 }
 
 java {
@@ -208,8 +217,17 @@ java {
 }
 
 jar {
+	inputs.property "archives_base_name", project.archives_base_name
 	from(rootProject.file('LICENSE')) {
-		rename { "${it}_${project.archives_base_name}" }
+		rename { "${it}_${inputs.properties.archives_base_name}" }
+	}
+}
+
+if (!unobfuscated) {
+	remapJar {
+		// Fix "Mapping source name conflicts detected" error on remapJar task
+		// https://discord.com/channels/792699517631594506/1245758973345398834
+		enabled = !(mcVersion >= 12005 && mod_brand == 'forge')
 	}
 }
 
