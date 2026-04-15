@@ -20,30 +20,40 @@
 
 package me.fallenbreath.fastipping;
 
+//#if MC >= 1.18.2
+//$$ import com.mojang.logging.LogUtils;
+//$$ import org.slf4j.Logger;
+//#else
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-//#if FORGE
-//$$ import net.minecraftforge.fml.common.Mod;
-//#elseif NEOFORGE
-//$$ import net.neoforged.fml.common.Mod;
 //#endif
 
-//#if FORGE_LIKE
-//$$ @Mod("fastipping")
-//#endif
+@net.minecraftforge.fml.common.Mod(FastIpPingMod.MOD_ID)
+@net.neoforged.fml.common.Mod(FastIpPingMod.MOD_ID)
 public class FastIpPingMod
-		//#if FABRIC
-		implements net.fabricmc.api.ModInitializer
-		//#endif
 {
-	public static final Logger LOGGER = LogManager.getLogger();
+	public static final Logger LOGGER =
+			//#if MC >= 11802
+			//$$ LogUtils.getLogger();
+			//#else
+			LogManager.getLogger();
+			//#endif
+
+	public static final String MOD_ID = "fastipping";
 
 	//#if FABRIC
-	@Override public void onInitialize()
+	public void fabricInit()
+	{
+		this.commonInit();
+	}
 	//#elseif FORGE_LIKE
 	//$$ public FastIpPingMod()
+	//$$ {
+	//$$ 	this.commonInit();
+	//$$ }
 	//#endif
+
+	private void commonInit()
 	{
 		LOGGER.info("ping & connect fast!");
 	}

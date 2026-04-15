@@ -20,9 +20,9 @@
 
 package me.fallenbreath.fastipping.mixins;
 
-import net.minecraft.client.multiplayer.resolver.ServerAddressResolver;
 import me.fallenbreath.fastipping.impl.InetAddressPatcher;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
+import net.minecraft.client.multiplayer.resolver.ServerAddressResolver;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;

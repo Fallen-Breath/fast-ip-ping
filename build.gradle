@@ -5,7 +5,7 @@ plugins {
 	id 'maven-publish'
 	id 'com.github.hierynomus.license' version '0.16.1' apply false
 	id 'dev.architectury.loom' version '1.14-SNAPSHOT' apply false
-	id 'net.fabricmc.fabric-loom' version '1.15-SNAPSHOT' apply false
+	id 'net.fabricmc.fabric-loom' version '1.16-SNAPSHOT' apply false
 
 	// https://github.com/ReplayMod/preprocessor
 	// https://github.com/Fallen-Breath/preprocessor
@@ -41,7 +41,7 @@ preprocess {
 		def (mc_version, mod_brand) = version.split("-")
 		def node = all_nodes[version]
 		switch (mod_brand) {
-			case "fabric":
+			case ["fabric", "merged"]:
 				if (prev_fabric_node != null) {
 					linkNode(prev_fabric_node, all_nodes[version])
 				}
