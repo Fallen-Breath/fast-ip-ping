@@ -41,19 +41,13 @@ public class FastIpPingMod
 
 	public static final String MOD_ID = "fastipping";
 
-	//#if FABRIC
-	public void fabricInit()
+	public static void fabricInit()
 	{
-		this.commonInit();
+		//noinspection InstantiationOfUtilityClass
+		new FastIpPingMod();
 	}
-	//#elseif FORGE_LIKE
-	//$$ public FastIpPingMod()
-	//$$ {
-	//$$ 	this.commonInit();
-	//$$ }
-	//#endif
 
-	private void commonInit()
+	public FastIpPingMod()
 	{
 		LOGGER.info("ping & connect fast!");
 	}
